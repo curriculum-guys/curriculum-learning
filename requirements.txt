@@ -1,0 +1,7 @@
+setuptools
+wheel
+numpy
+pandas
+sklearn
+imblearn
+git+https://github.com/curriculum-guys/data-interfaces.git@master
