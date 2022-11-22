@@ -3,5 +3,5 @@ wheel
 numpy
 pandas
 sklearn
-imblearn
+imbalanced-learn
 git+https://github.com/curriculum-guys/data-interfaces.git@master
