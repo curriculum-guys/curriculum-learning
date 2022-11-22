@@ -1,6 +1,6 @@
 from datetime import datetime
 import logging
-from utils import create_dirs, get_root_dir
+from data_interfaces.utils import create_dirs, get_root_dir
 
 class SpecialistLogs:
     def create(self, name):

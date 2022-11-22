@@ -1,6 +1,6 @@
 from curriculum_learning.specialist.interface import Specialist
-from data_interfaces.specialiststats import SpecialistStats
-from data_interfaces.baseconditions import BaseConditions
+from data_interfaces.stats.specialist import SpecialistStats
+from data_interfaces.conditions.base import BaseConditions
 from sklearn.exceptions import NotFittedError
 
 class SpecialistManager:
