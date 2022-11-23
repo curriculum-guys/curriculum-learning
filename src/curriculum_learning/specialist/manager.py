@@ -4,7 +4,7 @@ from data_interfaces.conditions.base import BaseConditions
 from sklearn.exceptions import NotFittedError
 
 class SpecialistManager:
-    def __init__(self, name, environment, seed, systematic_conditions=None) -> None:
+    def __init__(self, name, environment, seed, systematic_conditions=None, upload_reference=None) -> None:
         self.generation = 0
         self.name = name
         self.environment = environment
@@ -13,6 +13,7 @@ class SpecialistManager:
         self.integrated_interfaces = {}
         self.systematic_interfaces = {}
         self.systematic_conditions = systematic_conditions
+        self.upload_reference = upload_reference
         self.reset_data()
 
     def read_config(self, config):
@@ -39,12 +40,12 @@ class SpecialistManager:
 
     def add_integrated_interface(self, name):
         save_dir = f'/{self.name}_manager/{name}_stats'
-        integrated_interface = SpecialistStats(self.environment, self.seed, save_dir)
+        integrated_interface = SpecialistStats(self.environment, self.seed, save_dir, upload_reference=self.upload_reference)
         self.integrated_interfaces[name] = integrated_interface
 
     def add_systematic_interface(self, name):
         save_dir = f'/{self.name}_manager/{name}_base_conditions'
-        systematic_interface = BaseConditions(self.environment, self.seed, len(self.systematic_conditions), save_dir)
+        systematic_interface = BaseConditions(self.environment, self.seed, len(self.systematic_conditions), save_dir, upload_reference=self.upload_reference)
         self.systematic_interfaces[name] = systematic_interface
 
     def add_specialist(self, name, config):
