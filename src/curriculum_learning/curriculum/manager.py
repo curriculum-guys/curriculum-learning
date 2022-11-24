@@ -40,7 +40,7 @@ class CurriculumManager:
         r = random.randint(1, n_conditions) if random_conditions else 1
         return [self.reset_function(i * r) for i in range(n_conditions)]
 
-    def process_conditions(self, margin=10):
+    def predict_conditions(self, margin=10):
         raw = self.generate_conditions(self.trials * margin)
         predicted = self.specialist.predict(raw)
         easy, hard = [], []
@@ -51,18 +51,36 @@ class CurriculumManager:
                 easy.append(raw[i])
         return easy, hard
 
+    def fill_gaps(self, conditions, expected):
+        current = len(conditions)
+
+        if current > 0:
+            i = 0
+            while (current + i) < expected:
+                conditions += conditions[i % current]
+                i += 1
+            return current[:expected]
+
+    def process_conditions(self, proportion):
+        easy, hard = self.predict_conditions()
+
+        expected_easy = int(proportion * self.trials)
+        easy_conditions = self.fill_gaps(easy, expected_easy)
+        expected_hard = int((1-proportion) * self.trials)
+        hard_conditions = self.fill_gaps(hard, expected_hard)
+
+        if hard_conditions and easy_conditions:
+            self.actual_curriculum = list(easy_conditions) + list(hard_conditions)
+        else:
+            self.actual_curriculum = None
+
     def create_curriculum(self, proportion):
         if self.active:
             start_time = time.time()
-            easy, hard = self.process_conditions()
-
-            n_easy = int(proportion * self.trials)
-            n_hard = int((1-proportion) * self.trials)
-            self.actual_curriculum = list(easy[:n_easy]) + list(hard[:n_hard])
-            self.proportion = proportion
-
+            self.process_conditions(proportion)
             end_time = time.time()
+
+            self.proportion = proportion
             self.creation_time = end_time - start_time
             self.update_log()
-
             return self.actual_curriculum
