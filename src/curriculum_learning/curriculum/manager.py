@@ -59,7 +59,7 @@ class CurriculumManager:
             while (current + i) < expected:
                 conditions += conditions[i % current]
                 i += 1
-            return current[:expected]
+            return conditions[:expected]
 
     def process_conditions(self, proportion):
         easy, hard = self.predict_conditions()
