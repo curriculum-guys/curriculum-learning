@@ -57,7 +57,7 @@ class CurriculumManager:
         if current > 0:
             i = 0
             while (current + i) < expected:
-                conditions += conditions[i % current]
+                conditions.append(conditions[i % current])
                 i += 1
             return conditions[:expected]
 
