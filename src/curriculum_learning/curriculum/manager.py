@@ -22,7 +22,8 @@ class CurriculumManager:
         return {
             'creation_time': self.creation_time,
             'proportion': self.proportion,
-            'actual_curriculum': self.actual_curriculum
+            'actual_curriculum': self.actual_curriculum,
+            'auto_fill': f'EASY: {self.easy_fill} - HARD: {self.hard_fill}'
         }
 
     def update_log(self):
@@ -59,15 +60,16 @@ class CurriculumManager:
             while (current + i) < expected:
                 conditions.append(conditions[i % current])
                 i += 1
-            return conditions[:expected]
+            return conditions[:expected], i
+        return None, -1
 
     def process_conditions(self, proportion):
         easy, hard = self.predict_conditions()
 
         expected_easy = int(proportion * self.trials)
-        easy_conditions = self.fill_gaps(easy, expected_easy)
+        easy_conditions, self.easy_fill = self.fill_gaps(easy, expected_easy)
         expected_hard = int((1-proportion) * self.trials)
-        hard_conditions = self.fill_gaps(hard, expected_hard)
+        hard_conditions, self.hard_fill = self.fill_gaps(hard, expected_hard)
 
         if hard_conditions and easy_conditions:
             self.actual_curriculum = list(easy_conditions) + list(hard_conditions)
