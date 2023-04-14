@@ -99,7 +99,7 @@ class Specialist:
 
     def get_labels(self, y):
         median = np.median(y)
-        return ['good' if p > median else 'bad' for p in y]
+        return ['good' if p >= median else 'bad' for p in y]
 
     def get_prediction_proportion(self, X, normalize=True):
         y_pred = list(self.predict(X, normalize=normalize))
@@ -128,10 +128,10 @@ class Specialist:
         self.score_predicted_labels_proportion = self.get_prediction_proportion(X)
 
     def fit(self, X, y):
-        normalized_X = self.normalize_data(X)
-        X_resampled, y_resampled = self.transform_data(normalized_X, y)
-        labels = self.get_labels(y_resampled)
-        self.model.fit(X_resampled, labels)
+        labels = self.get_labels(y)
+        X_resampled, y_resampled = self.transform_data(X, labels)
+        normalized_X = self.normalize_data(X_resampled)
+        self.model.fit(normalized_X, y_resampled)
         self.fit_predicted_labels_proportion = self.get_prediction_proportion(normalized_X, normalize=False)
 
     def predict(self, X, normalize=True):
@@ -145,7 +145,6 @@ class Specialist:
     ### Generation Processing
     def process_generation(self, X, y):
         self.set_data(X, y)
-        self.logger.update(self.generation, self.__generation_log)
 
         if self.score_batch_qualified:
             X, y = self.data.transform(limit=self.score_batch_size)
@@ -159,5 +158,6 @@ class Specialist:
         self.generation += 1
 
         data = self.data.save()
+        self.logger.update(self.generation, self.__generation_log)
         return data
     ### Generation Processing

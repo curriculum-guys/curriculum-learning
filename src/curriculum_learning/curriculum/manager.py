@@ -72,7 +72,7 @@ class CurriculumManager:
         easy_conditions, self.easy_fill = self.fill_gaps(easy, expected_easy)
         hard_conditions, self.hard_fill = self.fill_gaps(hard, expected_hard)
 
-        if hard_conditions and easy_conditions:
+        if len(hard_conditions) == expected_hard and len(easy_conditions) == expected_easy:
             self.actual_curriculum = list(easy_conditions) + list(hard_conditions)
         else:
             self.actual_curriculum = None
