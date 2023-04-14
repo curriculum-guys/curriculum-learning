@@ -8,7 +8,7 @@ class CurriculumManager:
         self.specialist = specialist
         self.reset_function = reset_function
         self.trials = trials
-        self.generation = 0
+        self.generation = 1
         self.creation_time = None
         self.proportion = None
         self.logger = CurriculumLogs()
@@ -41,7 +41,7 @@ class CurriculumManager:
         r = random.randint(1, n_conditions) if random_conditions else 1
         return [self.reset_function(i * r) for i in range(n_conditions)]
 
-    def predict_conditions(self, margin=10):
+    def predict_conditions(self, margin=100):
         raw = self.generate_conditions(self.trials * margin)
         predicted = self.specialist.predict(raw)
         easy, hard = [], []
@@ -67,8 +67,9 @@ class CurriculumManager:
         easy, hard = self.predict_conditions()
 
         expected_easy = int(proportion * self.trials)
+        expected_hard = int(self.trials - expected_easy)
+
         easy_conditions, self.easy_fill = self.fill_gaps(easy, expected_easy)
-        expected_hard = int((1-proportion) * self.trials)
         hard_conditions, self.hard_fill = self.fill_gaps(hard, expected_hard)
 
         if hard_conditions and easy_conditions:
@@ -78,11 +79,12 @@ class CurriculumManager:
 
     def create_curriculum(self, proportion):
         if self.active:
+            self.proportion = proportion
+
             start_time = time.time()
             self.process_conditions(proportion)
             end_time = time.time()
 
-            self.proportion = proportion
             self.creation_time = end_time - start_time
             self.update_log()
             return self.actual_curriculum

@@ -128,9 +128,10 @@ class Specialist:
         self.score_predicted_labels_proportion = self.get_prediction_proportion(X)
 
     def fit(self, X, y):
-        labels = self.get_labels(y)
         normalized_X = self.normalize_data(X)
-        self.model.fit(normalized_X, labels)
+        X_resampled, y_resampled = self.transform_data(normalized_X, y)
+        labels = self.get_labels(y_resampled)
+        self.model.fit(X_resampled, labels)
         self.fit_predicted_labels_proportion = self.get_prediction_proportion(normalized_X, normalize=False)
 
     def predict(self, X, normalize=True):
