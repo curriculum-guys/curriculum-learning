@@ -35,8 +35,8 @@ def generate_base_values(base_interval=3):
 
     return sorted(values)
 
-def generate_grid():
-    base_values = generate_base_values()
+def generate_grid(interval=3):
+    base_values = generate_base_values(interval)
     columns_values = np.transpose(base_values)
 
     conditions = []
