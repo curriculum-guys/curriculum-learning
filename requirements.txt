@@ -2,6 +2,6 @@ setuptools
 wheel
 numpy
 pandas
-sklearn
+scikit-learn
 imbalanced-learn
 git+https://github.com/curriculum-guys/data-interfaces.git@master
