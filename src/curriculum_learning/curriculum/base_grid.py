@@ -1,46 +1,43 @@
 import numpy as np
 import itertools
 
-STATE_RANGES = [
-    1.944,
-    1.215,
-    0.10472,
-    0.135088,
-    0.10472,
-    0.135088,
+DPOLE_STATES_LENGTH = 6
+DPOLE_STATE_RANGES = [
+    (-1.944, 1.944),
+    (-1.215, 1.215),
+    (-0.10472, 0.10472),
+    (-0.135088, 0.135088),
+    (-0.10472, 0.10472),
+    (-0.135088, 0.135088)
 ]
 
-STATIC_CONDITIONS = list(np.zeros(len(STATE_RANGES)))
+BIDEDAL_STATES_LENGTH = 200
+BIPEDAL_STATE_RANGES = [(0,3) for _ in range(BIDEDAL_STATES_LENGTH)]
 
+def get_experiment_info(experiment):
+    lengths = dict(
+        xbipedal=BIDEDAL_STATES_LENGTH,
+        xdpole=DPOLE_STATES_LENGTH
+    )
+    ranges = dict(
+        xbipedal=BIPEDAL_STATE_RANGES,
+        xdpole=DPOLE_STATE_RANGES
+    )
+    return lengths.get(experiment), ranges.get(experiment)
 
-def generate_base(interval, negative):
-    values = []
+def generate_states(ranges, n_states):
+    states = []
+    for state_range in ranges:
+        start, stop = state_range
+        possible_states = np.linspace(start, stop, n_states)
+        states.append(possible_states)
+    return states
 
-    for i in range(1, interval+1):
-        value = []
-        for base_state in STATE_RANGES:
-            state = -base_state/i if negative else base_state/i
-            value.append(state)
-
-        values.append(value)
-    return values
-
-def generate_base_values(base_interval=3):
-    interval = int((base_interval - 1)/2)
-    values = []
-
-    values += generate_base(interval=interval, negative=True)
-    values.append(STATIC_CONDITIONS)
-    values += generate_base(interval=interval, negative=False)
-
-    return sorted(values)
-
-def generate_grid(interval=3):
-    base_values = generate_base_values(interval)
-    columns_values = np.transpose(base_values)
+def generate_grid(experiment, n_states=3):
+    _, ranges = get_experiment_info(experiment)
+    states = generate_states(ranges, n_states)
 
     conditions = []
-    for element in itertools.product(*columns_values):
+    for element in itertools.product(*states):
         conditions.append(element)
-
     return conditions
