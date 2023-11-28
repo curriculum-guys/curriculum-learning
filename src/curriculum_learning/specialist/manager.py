@@ -101,7 +101,7 @@ class SpecialistManager:
     def process_data(self, data):
         X, y = [], []
         for env in data:
-            X.append(env[:-1])
+            X.append(env[1:-1]) # First position is reserved for seed value
             y.append(env[-1])
         return X, y
 

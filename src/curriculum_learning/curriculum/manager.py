@@ -43,7 +43,8 @@ class CurriculumManager:
 
     def predict_conditions(self, margin=100):
         raw = self.generate_conditions(self.trials * margin)
-        predicted = self.specialist.predict(raw)
+        data = [x[1:] for x in raw] # First position is reserved for seed values
+        predicted = self.specialist.predict(data)
         easy, hard = [], []
         for i in range(len(raw)):
             if predicted[i] == 'bad':
