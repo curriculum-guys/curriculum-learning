@@ -1,17 +1,20 @@
 import time
-from random import random
+import numpy as np
 from curriculum_learning.curriculum.logs import CurriculumLogs
 
 class CurriculumManager:
-    def __init__(self, name, specialist, reset_function, trials):
+    def __init__(self, name, enabled, specialist, reset_function, trials, proportion, margin=1000):
         self.name = name
+        self.enabled = enabled
         self.specialist = specialist
         self.reset_function = reset_function
         self.trials = trials
+        self.margin = margin
         self.generation = 1
         self.creation_time = None
-        self.proportion = None
+        self.proportion = proportion
         self.logger = CurriculumLogs()
+        self.counter = 0
         self.create_log(name)
 
     def create_log(self, name):
@@ -22,8 +25,8 @@ class CurriculumManager:
         return {
             'creation_time': self.creation_time,
             'proportion': self.proportion,
-            'actual_curriculum': self.actual_curriculum,
-            'auto_fill': f'EASY: {self.easy_fill} - HARD: {self.hard_fill}'
+            'hard_tasks': len(self.hard_tasks),
+            'easy_tasks': len(self.easy_tasks),
         }
 
     def update_log(self):
@@ -37,54 +40,47 @@ class CurriculumManager:
         init_generation = self.specialist.start_generation + self.specialist.fit_batch_size + self.specialist.score_batch_size + 1
         return (self.generation >= init_generation) and self.specialist.qualified
 
-    def generate_conditions(self, n_conditions, random_conditions=False):
-        r = random.randint(1, n_conditions) if random_conditions else 1
-        return [self.reset_function(i * r) for i in range(n_conditions)]
+    def predict(self, tasks):
+        X = [task for task in tasks] # First position is reserved for seed values
+        y = self.specialist.predict(X)
+        return X, y
 
-    def predict_conditions(self, margin=100):
-        raw = self.generate_conditions(self.trials * margin)
-        predicted = self.specialist.predict(raw)
+    def episodes(self, n, seed):
+        return [self.reset_function(seed + i) for i in range(n)]
+
+    def resample(self, X, y):
         easy, hard = [], []
-        for i in range(len(raw)):
-            if predicted[i] == 'bad':
-                hard.append(raw[i])
-            elif predicted[i] == 'good':
-                easy.append(raw[i])
+        for i in range(len(y)):
+            if y[i] == 'good':
+                easy.append(X[i])
+            else:
+                hard.append(X[i])
         return easy, hard
 
-    def fill_gaps(self, conditions, expected):
-        current = len(conditions)
-
-        if current > 0:
-            i = 0
-            while (current + i) < expected:
-                conditions.append(conditions[i % current])
-                i += 1
-            return conditions[:expected], i
-        return None, -1
-
-    def process_conditions(self, proportion):
-        easy, hard = self.predict_conditions()
-
-        expected_easy = int(proportion * self.trials)
-        expected_hard = int(self.trials - expected_easy)
-
-        easy_conditions, self.easy_fill = self.fill_gaps(easy, expected_easy)
-        hard_conditions, self.hard_fill = self.fill_gaps(hard, expected_hard)
-
-        if len(hard_conditions) == expected_hard and len(easy_conditions) == expected_easy:
-            self.actual_curriculum = list(easy_conditions) + list(hard_conditions)
-        else:
-            self.actual_curriculum = None
-
-    def create_curriculum(self, proportion):
-        if self.active:
-            self.proportion = proportion
-
+    def curriculum(self, seed):
+        if self.enabled and self.active:
             start_time = time.time()
-            self.process_conditions(proportion)
+            n = self.trials * self.margin
+            tasks = self.episodes(n, seed)
+            X, y = self.predict(tasks)
+            self.easy_tasks, self.hard_tasks = self.resample(X, y)
+            self.counter = self.margin
             end_time = time.time()
 
             self.creation_time = end_time - start_time
             self.update_log()
-            return self.actual_curriculum
+
+    def select_trials(self, seed):
+        if self.counter > 0:
+            np.random.seed(seed)
+            trials = []
+            for i in range(self.trials):
+                if i < (self.trials*self.proportion):
+                    e = np.random.randint(0, len(self.easy_tasks))
+                    trials.append(self.easy_tasks[e])
+                else:
+                    e = np.random.randint(0, len(self.hard_tasks))
+                    trials.append(self.hard_tasks[e])
+            return trials
+        else:
+            return self.episodes(self.trials, seed)
