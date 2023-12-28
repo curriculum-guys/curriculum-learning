@@ -38,7 +38,7 @@ class CurriculumManager:
     @property
     def active(self):
         init_generation = self.specialist.start_generation + self.specialist.fit_batch_size + self.specialist.score_batch_size + 1
-        return (self.generation >= init_generation) and self.specialist.qualified
+        return (self.generation > init_generation) and self.specialist.qualified
 
     def predict(self, tasks):
         X = [task for task in tasks] # First position is reserved for seed values
