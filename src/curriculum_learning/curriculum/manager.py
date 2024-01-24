@@ -41,9 +41,9 @@ class CurriculumManager:
         return (self.generation > init_generation) and self.specialist.qualified
 
     def predict(self, tasks):
-        X = [task for task in tasks] # First position is reserved for seed values
+        X = [task[1:] for task in tasks] # First position is reserved for seed values
         y = self.specialist.predict(X)
-        return X, y
+        return tasks, y
 
     def episodes(self, n, seed):
         return [self.reset_function(seed + i) for i in range(n)]
