@@ -23,7 +23,7 @@ class SpecialistManager:
     def process_specialist_stats(self, specialist):
         return [
             specialist.actual_score,
-            'fit' if specialist.fit_start else 'score',
+            0 if specialist.fit_start else 1,
             specialist.fit_predicted_labels_proportion,
             specialist.score_predicted_labels_proportion,
             specialist.actual_score_metrics.get('specialist_tn'),
