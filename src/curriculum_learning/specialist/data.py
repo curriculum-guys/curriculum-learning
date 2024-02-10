@@ -32,7 +32,10 @@ class SpecialistData:
         X = self.X
         y = self.y
         for i in range(len(X)):
-            data.append(X[i] + [y[i]])
+            data.append([
+                *X[i],
+                y[i]
+            ])
         self.add(data)
         return data
 

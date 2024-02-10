@@ -4,4 +4,4 @@ numpy
 pandas
 scikit-learn
 imbalanced-learn
-git+https://github.com/curriculum-guys/data-interfaces.git@master
+git+https://github.com/curriculum-guys/data-interfaces.git@0.1.5
